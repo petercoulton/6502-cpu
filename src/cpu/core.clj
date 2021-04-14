@@ -35,11 +35,23 @@
   [vm address value]
   (assoc-in vm [:mem address] value))
 
-
-
 (defn next-opcode
   [vm]
   (read-mem vm (cpu-pc vm)))
+
+(defn op-name
+  [opcode]
+  (cond
+    ;; BRK
+    (= 0 opcode) :brk
+    ;; LDA
+    (= 0xa9 opcode) :lda
+    ;; ADC
+    (= 0x69 opcode) :adc
+    ;; STA
+    (= 0x8d opcode) :sta
+    ;; UNKNOWN
+    :else :unknown))
 
 (defn incr-pc
   ([vm]
@@ -102,6 +114,7 @@
 (defn step
   [vm]
   (let [opcode (next-opcode vm)]
+    (prn (cpu-pc vm) (op-name opcode) vm)
     (cond
       ;; BRK
       (= 0 opcode) (brk vm)
@@ -113,15 +126,6 @@
       (= 0x8d opcode) (sta vm)
       ;; UNKNOWN
       :else vm)))
-
-;(->>
-;  (list cpu mem)
-;  (step 0xa9)
-;  (step 0x69)
-;  (step 0x8d)
-;  (step 0x0))
-;
-;(step 0x0 (step 0x8d (step 0x69 (step 0xa9 (list cpu mem)))))
 
 (defn run
   [vm]
