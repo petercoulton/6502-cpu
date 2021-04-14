@@ -132,7 +132,7 @@
   (loop [vm (step vm)]
     (if (not (cpu-brk-flag? vm))
       (recur (step vm))
-      vm)))
+      (prn (cpu-pc vm) :fin vm))))
 
 ;
 ; Main
