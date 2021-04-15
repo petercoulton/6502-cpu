@@ -157,10 +157,10 @@
 ; Test
 ;
 
-(def mem (load-program [0xa9 100
-                        0x69 7
-                        0x8d 15
-                        0
+(def mem (load-program [0xa9 100                            ; LDA 100
+                        0x69 7                              ; ADC 7
+                        0x8d 15                             ; STA 15
+                        0                                   ; BRK
                         ]))
 
 (def cpu {:pc  0
