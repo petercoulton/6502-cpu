@@ -7,10 +7,14 @@ A 6502 CPU emulator created during a Dojo.
 ## Example
 
 ```clojure
-(def mem (load-program [0xa9 100   ; LDA 100
-                        0x69 7     ; ADC 7 
-                        0x8d 15    ; STA 15
-                        ]))
+(def program
+  "LDA 100 ; foo
+   ADC 7
+   STA 15
+   BRK"
+  )
+
+(def mem (load-program (asm program)))
 
 (def cpu {:pc  0
           :ar  0
