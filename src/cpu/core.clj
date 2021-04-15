@@ -1,5 +1,6 @@
 (ns cpu.core
-  (:gen-class))
+  (:gen-class)
+  (:require [cpu.debug :refer :all]))
 
 ;
 ; Helpers
@@ -74,6 +75,15 @@
   [vm]
   (assoc-in vm [:cpu :brk] true))
 
+(defn make-mem
+  [mem size]
+  (let [padding (- size (.length mem))]
+    (vec (into mem (repeat padding 0)))))
+
+(defn load-program
+  [program]
+  (make-mem program 256))
+
 ;
 ; Operations
 ;
@@ -114,7 +124,6 @@
 (defn step
   [vm]
   (let [opcode (next-opcode vm)]
-    (prn (cpu-pc vm) (op-name opcode) vm)
     (cond
       ;; BRK
       (= 0 opcode) (brk vm)
@@ -132,8 +141,7 @@
   (loop [vm (step vm)]
     (if (not (cpu-brk-flag? vm))
       (recur (step vm))
-      (do (prn (cpu-pc vm) :fin vm)
-          vm))))
+      vm)))
 
 ;
 ; Main
@@ -149,14 +157,14 @@
 ; Test
 ;
 
-(def mem [0xa9 100
-          0x69 7
-          0x8d 15
-          0 0
-          0 0
-          0 0
-          0 0
-          0 0])
+(def mem (load-program [0xa9 100
+                        0x69 7
+                        0x8d 15
+                        0 0
+                        0 0
+                        0 0
+                        0 0
+                        0 0]))
 
 (def cpu {:pc  0
           :ar  0
@@ -164,4 +172,4 @@
 
 (def vm {:cpu cpu :mem mem})
 
-(run vm)
+;(dump!! (run vm))
