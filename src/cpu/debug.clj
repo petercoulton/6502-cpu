@@ -26,10 +26,16 @@
     (apply (partial format mem-row-format)
            (flatten (list loc data chars)))))
 
+(defn group-memory-into-rows
+  ([mem]
+   (group-memory-into-rows mem 16))
+  ([mem width]
+   (map-indexed #(list (reduce + %2) (* width %) %2)
+                (partition width mem))))
+
 (defn dedup-mem
   [mem]
-  (let [rows (map-indexed #(list (reduce + %2) (* 16 %) %2)
-                          (partition 16 mem))
+  (let [rows (group-memory-into-rows mem)
         end  (second (last rows))]
     (reverse
       (reduce (fn [s e]
@@ -47,21 +53,21 @@
   (let [lines (dedup-mem mem)]
     (map #(format-mem-row (rest %)) lines)))
 
+(defn format-register
+  [[k v]]
+  (format "%-3s = 0x%02x % 4d" k v v))
+
+(defn format-flags
+  [[k v]]
+  (format "%-3s = %b" k v))
+
 (defn format-registers
   [cpu]
-  (map (fn [reg]
-         (let [k (name (first reg))
-               v (second reg)]
-           (format "%-3s = 0x%02x % 4d" k v v)))
-       (select-keys cpu [:pc :ar])))
+  (map format-register (select-keys cpu [:pc :ar])))
 
 (defn format-status-flag
   [cpu]
-  (map (fn [reg]
-         (let [k (name (first reg))
-               v (second reg)]
-           (format "%-3s = %b" k v)))
-       (select-keys cpu [:brk])))
+  (map format-flags (select-keys cpu [:brk])))
 
 (defn format-dump
   [vm]
@@ -69,6 +75,8 @@
     (list (format-registers (:cpu vm))
           (format-status-flag (:cpu vm))
           (format-mem (:mem vm)))))
+
+;
 
 (defn dump!!
   [vm]
