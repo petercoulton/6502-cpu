@@ -160,11 +160,8 @@
 (def mem (load-program [0xa9 100
                         0x69 7
                         0x8d 15
-                        0 0
-                        0 0
-                        0 0
-                        0 0
-                        0 0]))
+                        0
+                        ]))
 
 (def cpu {:pc  0
           :ar  0
