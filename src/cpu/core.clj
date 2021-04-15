@@ -1,6 +1,7 @@
 (ns cpu.core
   (:gen-class)
-  (:require [cpu.debug :refer :all]))
+  (:require [cpu.debug :refer :all]
+            [cpu.assemble :refer :all]))
 
 ;
 ; Helpers
@@ -39,20 +40,6 @@
 (defn next-opcode
   [vm]
   (read-mem vm (cpu-pc vm)))
-
-(defn op-name
-  [opcode]
-  (cond
-    ;; BRK
-    (= 0 opcode) :brk
-    ;; LDA
-    (= 0xa9 opcode) :lda
-    ;; ADC
-    (= 0x69 opcode) :adc
-    ;; STA
-    (= 0x8d opcode) :sta
-    ;; UNKNOWN
-    :else :unknown))
 
 (defn incr-pc
   ([vm]
@@ -157,11 +144,14 @@
 ; Test
 ;
 
-(def mem (load-program [0xa9 100                            ; LDA 100
-                        0x69 7                              ; ADC 7
-                        0x8d 15                             ; STA 15
-                        0                                   ; BRK
-                        ]))
+(def program
+  "LDA 100 ; foo
+   ADC 7
+   STA 15
+   BRK"
+  )
+
+(def mem (load-program (asm program)))
 
 (def cpu {:pc  0
           :ar  0
