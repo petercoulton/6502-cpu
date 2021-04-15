@@ -8,9 +8,9 @@
 
 (defn inc-pc
   ([pc]
-   (mod (inc pc) 16))
+   (mod (inc pc) 256))
   ([pc n]
-   (mod (+ n pc) 16)))
+   (mod (+ n pc) 256)))
 
 (defn cpu-pc
   [vm]
