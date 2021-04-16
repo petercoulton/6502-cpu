@@ -55,19 +55,19 @@
 
 (defn format-register
   [[k v]]
-  (format "%-3s = 0x%02x % 4d" k v v))
+  (format "%-4s = 0x%02x % 4d" k v v))
 
 (defn format-flags
   [[k v]]
-  (format "%-3s = %b" k v))
+  (format "%-4s = %b" k v))
 
 (defn format-registers
   [cpu]
-  (map format-register (select-keys cpu [:pc :ar])))
+  (map format-register (select-keys cpu [:pc :ar :xr :yr])))
 
 (defn format-status-flag
   [cpu]
-  (map format-flags (select-keys cpu [:brk])))
+  (map format-flags (select-keys cpu [:brk :eq])))
 
 (defn format-dump
   [vm]

@@ -25,6 +25,14 @@
   [vm]
   (:ar (:cpu vm)))
 
+(defn cpu-xr
+  [vm]
+  (:xr (:cpu vm)))
+
+(defn cpu-yr
+  [vm]
+  (:yr (:cpu vm)))
+
 (defn cpu-brk-flag?
   [vm]
   (= true (cpu-brk vm)))
@@ -57,6 +65,25 @@
   [vm n]
   (let [ar (cpu-ar vm)]
     (set-ar vm (+ ar n))))
+
+(defn set-xr
+  [vm n]
+  (assoc-in vm [:cpu :xr] n))
+
+(defn incr-xr
+  [vm]
+  (let [xr (cpu-xr vm)]
+    (set-xr vm (inc xr))))
+
+(defn set-yr
+  [vm n]
+  (assoc-in vm [:cpu :yr] n))
+
+(defn incr-yr
+  [vm]
+  (let [yr (cpu-yr vm)]
+    (set-yr vm (inc yr))))
+
 
 (defn set-flag-brk
   [vm]
@@ -108,20 +135,41 @@
         (write-mem address ar)
         (incr-pc 2))))
 
+(defn ldx
+  [vm]
+  (let [pc    (cpu-pc vm)
+        value (read-mem vm (+ 1 pc))]
+    (-> vm
+        (set-xr value)
+        (incr-pc 2))))
+
+(defn inx
+  [vm]
+  (-> vm
+      (incr-xr)
+      (incr-pc)))
+
+(defn ldy
+  [vm]
+  (let [pc    (cpu-pc vm)
+        value (read-mem vm (+ 1 pc))]
+    (-> vm
+        (set-yr value)
+        (incr-pc 2))))
+
 ;
 
 (defn step
   [vm]
   (let [opcode (next-opcode vm)]
-    (cond
-      ;; BRK
-      (= 0 opcode) (brk vm)
-      ;; LDA
-      (= 0xa9 opcode) (lda vm)
-      ;; ADC
-      (= 0x69 opcode) (adc vm)
-      ;; STA
-      (= 0x8d opcode) (sta vm)
+    (condp = opcode
+      0x00 (brk vm)
+      0xa9 (lda vm)
+      0x69 (adc vm)
+      0x8d (sta vm)
+      0xa2 (ldx vm)
+      0xe8 (inx vm)
+      0xa0 (ldy vm)
       ;; UNKNOWN
       :else vm)))
 
@@ -150,6 +198,9 @@
   "LDA 100 ; foo
    ADC 7
    STA 15
+   LDX 12
+   INX
+   LDY 24
    BRK"
   )
 
@@ -157,8 +208,11 @@
 
 (def cpu {:pc  0
           :ar  0
-          :brk false})
+          :xr  0
+          :yr  0
+          :brk false
+          :eq  false})
 
 (def vm {:cpu cpu :mem mem})
 
-;(dump!! (run vm))
+(dump!! (run vm))

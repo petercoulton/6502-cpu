@@ -39,7 +39,10 @@
     'BRK 0
     'LDA 0xa9
     'ADC 0x69
-    'STA 0x8d))
+    'STA 0x8d
+    'LDX 0xa2
+    'INX 0xe8
+    'LDY 0xa0))
 
 (defn assemble-code
   [code]
