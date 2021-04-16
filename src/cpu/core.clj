@@ -68,8 +68,10 @@
     (vec (into mem (repeat padding 0)))))
 
 (defn load-program
-  [program]
-  (make-mem program 256))
+  ([program]
+   (make-mem program 256))
+  ([program mem-size]
+   (make-mem program mem-size)))
 
 ;
 ; Operations

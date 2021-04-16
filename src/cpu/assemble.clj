@@ -33,13 +33,6 @@
         operand (second tokens)]
     (make-instruction opcode operand)))
 
-(defn parse-program
-  [^CharSequence program]
-  (for [line (split-lines program)]
-    (-> line
-        (strip-comments)
-        (parse-line))))
-
 (defn opcode->byte
   [opcode]
   (condp = opcode
@@ -56,6 +49,13 @@
       (if (nil? value)
         opcode-byte
         [opcode-byte value]))))
+
+(defn parse-program
+  [^CharSequence program]
+  (for [line (split-lines program)]
+    (-> line
+        (strip-comments)
+        (parse-line))))
 
 (defn asm
   [^CharSequence program]
