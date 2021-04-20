@@ -1,6 +1,7 @@
 (ns cpu.assemble
   (:require [clojure.string :as str]
-            [clojure.edn :as edn]))
+            [clojure.edn :as edn]
+            [cpu.instructions :refer :all]))
 
 (defn split-lines
   [^CharSequence lines]
@@ -19,7 +20,7 @@
 
 (defn make-instruction
   [opcode value]
-  {:opcode (symbol (.toUpperCase opcode))
+  {:opcode (keyword (.toLowerCase opcode))
    :value (parse-value value)})
 
 (defn tokenize-line
@@ -35,14 +36,10 @@
 
 (defn opcode->byte
   [opcode]
-  (condp = opcode
-    'BRK 0
-    'LDA 0xa9
-    'ADC 0x69
-    'STA 0x8d
-    'LDX 0xa2
-    'INX 0xe8
-    'LDY 0xa0))
+  (let [instruction (first (filter #(= opcode (:name %)) @instructions))]
+    (if (nil? instruction)
+      0x00
+      (:opcode instruction))))
 
 (defn assemble-code
   [code]
@@ -67,9 +64,4 @@
       (assemble-code)
       (flatten)
       (vec)))
-
-;(asm "LDA 100 ; foo
-;      ADC 7
-;      STA 15
-;      BRK")
 

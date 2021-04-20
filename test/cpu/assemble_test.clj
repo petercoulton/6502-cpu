@@ -1,6 +1,7 @@
 (ns cpu.assemble-test
   (:require [clojure.test :refer :all]
             [cpu.assemble :refer :all]
+            [cpu.helpers :refer :all]
             [cpu.core :refer :all]))
 
 
