@@ -70,11 +70,63 @@
 
 (defasm :inx
         "Increment X register by one"
-        [0xe8 2]
+        [0xe8 1]
         (fn [vm]
           (-> vm
               (incr-xr)
               (incr-pc))))
+
+(defasm :iny
+        "Increment Y register by one"
+        [0xc8 1]
+        (fn [vm]
+          (-> vm
+              (incr-yr)
+              (incr-pc))))
+
+(defasm :cpy
+        "Compare memory and Y register"
+        [0xe0 2]
+        (fn [vm]
+          (let [pc    (cpu-pc vm)
+                yr    (cpu-yr vm)
+                value (read-mem vm (+ 1 pc))]
+            (-> vm
+                (set-flag-eq (= yr value))
+                (incr-pc 2)))))
+
+(defasm :bne
+        "Branch if not equal Pz=0"
+        [0xd0 2]
+        (fn [vm]
+          (let [pc    (cpu-pc vm)
+                value (read-mem vm (+ 1 pc))
+                pc-inc (if (not (cpu-flag-eq vm))
+                         value
+                         2)]
+            (-> vm
+                (incr-pc pc-inc)))))
+
+(defasm :stax
+        "Store the value from the A register in the memory location stored in the X register"
+        ;; This is a non-standard instruction
+        ;; I picked 0x8f because I think it's unused
+        [0x8f 1]
+        (fn [vm]
+          (let [ar (cpu-ar vm)
+                xr (cpu-xr vm)]
+            (-> vm
+                (write-mem xr ar)
+                (incr-pc)))))
+
+(defasm :dey
+        "Decrement Y register by one"
+        [0x88 1]
+        (fn [vm]
+          (let [yr (cpu-yr vm)]
+            (-> vm
+                (set-yr (dec yr))
+                (incr-pc)))))
 
 (defasm :ldy
         "Load the Y register with memory"
@@ -85,5 +137,12 @@
             (-> vm
                 (set-yr value)
                 (incr-pc 2)))))
+
+(defasm :nop
+        "No operation"
+        [0xea 1]
+        (fn [vm]
+          (-> vm
+              (incr-pc))))
 
 

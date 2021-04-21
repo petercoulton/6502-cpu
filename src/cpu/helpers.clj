@@ -8,23 +8,23 @@
 
 (defn cpu-pc
   [vm]
-  (:pc (:cpu vm)))
+  (get-in vm [:cpu :pc]))
 
 (defn cpu-brk
   [vm]
-  (:brk (:cpu vm)))
+  (get-in vm [:cpu :brk]))
 
 (defn cpu-ar
   [vm]
-  (:ar (:cpu vm)))
+  (get-in vm [:cpu :ar]))
 
 (defn cpu-xr
   [vm]
-  (:xr (:cpu vm)))
+  (get-in vm [:cpu :xr]))
 
 (defn cpu-yr
   [vm]
-  (:yr (:cpu vm)))
+  (get-in vm [:cpu :yr]))
 
 (defn cpu-brk-flag?
   [vm]
@@ -81,6 +81,14 @@
 (defn set-flag-brk
   [vm]
   (assoc-in vm [:cpu :brk] true))
+
+(defn set-flag-eq
+  [vm equal?]
+  (assoc-in vm [:cpu :eq] equal?))
+
+(defn cpu-flag-eq
+  [vm]
+  (get-in vm [:cpu :eq]))
 
 (defn make-mem
   [mem size]
