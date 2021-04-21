@@ -3,6 +3,7 @@
 A 6502 CPU emulator created during a Dojo.
 
 + http://www.8bitpickles.com/writing-a-cpu-emulator-as-a-dojo/
++ [6502 Datasheeet](http://archive.6502.org/datasheets/wdc_w65c02s_oct_8_2018.pdf)
 
 ## Example
 
