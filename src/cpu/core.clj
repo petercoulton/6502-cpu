@@ -134,12 +134,98 @@
   BNE -19       ; 107
   BRK           ; 109")
 
+(def program-3
+  "LDX 128
+  LDA 0x77
+  STAX
+  INX
+  LDA 0x68
+  STAX
+  INX
+  LDA 0x6F
+  STAX
+  INX
+  LDA 0x20
+  STAX
+  INX
+  LDA 0x6c
+  STAX
+  INX
+  LDA 0x65
+  STAX
+  INX
+  LDA 0x74
+  STAX
+  INX
+  LDA 0x20
+  STAX
+  INX
+  LDA 0x74
+  STAX
+  INX
+  LDA 0x68
+  STAX
+  INX
+  LDA 0x65
+  STAX
+  INX
+  LDA 0x20
+  STAX
+  INX
+  LDA 0x64
+  STAX
+  INX
+  LDA 0x6F
+  STAX
+  INX
+  LDA 0x67
+  STAX
+  INX
+  LDA 0x73
+  STAX
+  INX
+  LDA 0x20
+  STAX
+  INX
+  LDA 0x6F
+  STAX
+  INX
+  LDA 0x75
+  STAX
+  INX
+  LDA 0x74
+  STAX
+  INX
+  LDA 0x20
+  STAX
+  INX
+  LDY 3     ; loop (y = 3)
+  JSR 97    ;   call 'write who' subroutine
+  DEY       ;   y--
+  CPY 0     ;   test y==0
+  BNE -5    ; while (y != 0)
+  BRK
+  LDA 0x77  ; start 'write who' subroutine
+  STAX
+  INX
+  LDA 0x68
+  STAX
+  INX
+  LDA 0x6F
+  STAX
+  INX
+  LDA 0x20
+  STAX
+  INX
+  RET       ; end 'write who' subroutine")
+
 (def mem (load-program (asm program-1)))
 
 (def cpu {:pc  0
           :ar  0
           :xr  0
           :yr  0
+          :sp  (dec max-mem)
           :brk false
           :eq  false})
 

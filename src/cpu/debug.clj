@@ -63,7 +63,7 @@
 
 (defn format-registers
   [cpu]
-  (map format-register (select-keys cpu [:pc :ar :xr :yr])))
+  (map format-register (select-keys cpu [:pc :ar :xr :yr :sp])))
 
 (defn format-status-flag
   [cpu]

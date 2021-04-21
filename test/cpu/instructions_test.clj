@@ -2,6 +2,7 @@
   (:require [clojure.test :refer :all]
             [cpu.helpers :refer :all]
             [cpu.assemble :refer :all]
+            [cpu.debug :refer :all]
             [cpu.core :refer :all]))
 
 (defn make-memory
@@ -11,7 +12,7 @@
    (vec (into (asm program) (reverse additional-memory)))))
 
 (defn make-cpu
-  ([] {:pc 0 :ar 0 :xr 0 :yr 0 :brk false :eq false})
+  ([] {:pc 0 :ar 0 :xr 0 :yr 0 :sp 0 :brk false :eq false})
   ([cpu-parts]
    (merge (make-cpu) cpu-parts)))
 
@@ -111,3 +112,34 @@
           final-state   (-> initial-state (step))]
       (is (= 0x12 (cpu-yr final-state)) "Loads the Y register with memory")
       (is (= 2 (cpu-pc final-state)) "Increments the program counter by 2"))))
+
+(deftest jsr-tests
+  (testing "JSR Jump to new location Saving Return"
+    (let [initial-state {:cpu (make-cpu {:sp 15})
+                         :mem (make-memory "NOP
+                                            JSR 3"
+                                           [0 0 0 0 0 0 0 0 0 0 0 0 0 0])}
+          final-state   (-> initial-state
+                            (step)
+                            (step))]
+      (is (= 1 (read-mem final-state 15)) "Pushes the current PC onto the stack")
+      (is (= 14 (cpu-sp final-state)) "Decrements SP")
+      (is (= 2 (cpu-pc final-state)) "Sets the PC to the next value in memory - 1"))))
+
+(deftest rts-tests
+  (testing "RTS Return from subroutine"
+    (let [initial-state {:cpu (make-cpu {:sp 15})
+                         :mem (make-memory "NOP    ; 0
+                                            JSR 5  ; 1
+                                            BRK    ; 3
+                                            NOP    ; 4
+                                            RET    ; 5
+                                            "
+                                           [0 0 0 0 0 0 0 0 0 0 0 0 0 0])}
+          final-state   (-> initial-state
+                            (step)                          ; 0  NOP
+                            (step)                          ; 1  JSR 5
+                            (step)                          ; 3  NOP
+                            (step))]                        ; 4  RET
+      (is (= 15 (cpu-sp final-state)) "Increments SP")
+      (is (= 3 (cpu-pc final-state)) "Sets the PC to the return address + 1"))))

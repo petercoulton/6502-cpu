@@ -99,8 +99,8 @@
         "Branch if not equal Pz=0"
         [0xd0 2]
         (fn [vm]
-          (let [pc    (cpu-pc vm)
-                value (read-mem vm (+ 1 pc))
+          (let [pc     (cpu-pc vm)
+                value  (read-mem vm (+ 1 pc))
                 pc-inc (if (not (cpu-flag-eq vm))
                          value
                          2)]
@@ -145,4 +145,25 @@
           (-> vm
               (incr-pc))))
 
+(defasm :jsr
+        "Jump to new location Saving Return"
+        [0x20 2]
+        (fn [vm]
+          (let [address    (cpu-sp vm)
+                value      (cpu-pc vm)
+                next-value (read-mem vm (inc (cpu-pc vm)))]
+            (-> vm
+                (write-mem address value)
+                (dec-sp)
+                (set-pc (dec next-value))))))
 
+(defasm :ret
+        "Return from subroutine"
+        [0x60 1]
+        (fn [vm]
+          (let [sp             (cpu-sp vm)
+                return-address (read-mem vm (inc sp))]
+            (-> vm
+                (inc-sp)
+                (set-pc (inc return-address))
+                (incr-pc)))))

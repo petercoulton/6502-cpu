@@ -1,14 +1,20 @@
 (ns cpu.helpers)
 
+(def max-mem 640)
+
 (defn inc-pc
   ([pc]
-   (mod (inc pc) 256))
+   (mod (inc pc) max-mem))
   ([pc n]
-   (mod (+ n pc) 256)))
+   (mod (+ n pc) max-mem)))
 
 (defn cpu-pc
   [vm]
   (get-in vm [:cpu :pc]))
+
+(defn set-pc
+  [vm value]
+  (assoc-in vm [:cpu :pc] value))
 
 (defn cpu-brk
   [vm]
@@ -90,6 +96,24 @@
   [vm]
   (get-in vm [:cpu :eq]))
 
+(defn cpu-sp
+  [vm]
+  (get-in vm [:cpu :sp]))
+
+(defn set-sp
+  [vm value]
+  (assoc-in vm [:cpu :sp] value))
+
+(defn inc-sp
+  [vm]
+  (let [sp (cpu-sp vm)]
+    (set-sp vm (+ 1 sp))))
+
+(defn dec-sp
+  [vm]
+  (let [sp (cpu-sp vm)]
+    (set-sp vm (dec sp))))
+
 (defn make-mem
   [mem size]
   (let [padding (- size (.length mem))]
@@ -97,7 +121,7 @@
 
 (defn load-program
   ([program]
-   (make-mem program 256))
+   (make-mem program max-mem))
   ([program mem-size]
    (make-mem program mem-size)))
 
