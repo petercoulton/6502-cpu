@@ -157,7 +157,7 @@
                 (dec-sp)
                 (set-pc (dec next-value))))))
 
-(defasm :ret
+(defasm :rts
         "Return from subroutine"
         [0x60 1]
         (fn [vm]

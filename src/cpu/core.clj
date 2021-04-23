@@ -217,7 +217,7 @@
   LDA 0x20
   STAX
   INX
-  RET       ; end 'write who' subroutine")
+  RTS       ; end 'write who' subroutine")
 
 (def mem (load-program (asm program-1)))
 

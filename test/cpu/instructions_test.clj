@@ -133,13 +133,13 @@
                                             JSR 5  ; 1
                                             BRK    ; 3
                                             NOP    ; 4
-                                            RET    ; 5
+                                            RTS    ; 5
                                             "
                                            [0 0 0 0 0 0 0 0 0 0 0 0 0 0])}
           final-state   (-> initial-state
                             (step)                          ; 0  NOP
                             (step)                          ; 1  JSR 5
                             (step)                          ; 3  NOP
-                            (step))]                        ; 4  RET
+                            (step))]                        ; 4  RTS
       (is (= 15 (cpu-sp final-state)) "Increments SP")
       (is (= 3 (cpu-pc final-state)) "Sets the PC to the return address + 1"))))
