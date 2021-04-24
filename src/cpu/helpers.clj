@@ -40,6 +40,14 @@
   [vm address]
   (nth (:mem vm) address))
 
+(defn get-mem
+  [vm]
+  (:mem vm))
+
+(defn get-cpu
+  [vm]
+  (:cpu vm))
+
 (defn write-mem
   [vm address value]
   (assoc-in vm [:mem address] value))
@@ -125,7 +133,4 @@
   ([program mem-size]
    (make-mem program mem-size)))
 
-(defn lookup-instruction
-  [opcode instructions]
-  (first (filter #(= opcode (:opcode %)) instructions)))
 

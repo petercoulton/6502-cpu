@@ -3,21 +3,27 @@
 
 (def instructions (atom []))
 
+(defn lookup-instruction
+  [opcode instructions]
+  (first (filter #(= opcode (:opcode %)) instructions)))
+
 (defn- make-instruction
   "Create a new instruction"
-  [name doc [opcode size] func]
+  [name doc [opcode size mode] func]
   (let []
     {:name   name
      :doc    doc
      :opcode opcode
      :size   size
-     :func   func}))
+     :func   func
+     :mode   mode}))
 
 (defn defasm
   "Define a new instruction"
-  [name doc [opcode size] func]
-  (let [inst (make-instruction name doc [opcode size] func)]
-    (swap! instructions conj inst)))
+  ([name doc [opcode size mode] func]
+   (let [mode (if (nil? mode) :absolute mode)
+         inst (make-instruction name doc [opcode size mode] func)]
+     (swap! instructions conj inst))))
 
 (defasm :brk
         "Stop the program"
@@ -97,7 +103,7 @@
 
 (defasm :bne
         "Branch if not equal Pz=0"
-        [0xd0 2]
+        [0xd0 2 :relative]
         (fn [vm]
           (let [pc     (cpu-pc vm)
                 value  (read-mem vm (+ 1 pc))

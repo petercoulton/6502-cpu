@@ -1,9 +1,14 @@
 (ns cpu.core
   (:gen-class)
   (:require [cpu.debug :refer :all]
-            [cpu.helpers :refer :all]
-            [cpu.instructions :refer :all]
-            [cpu.assemble :refer :all]))
+            [cpu.helpers :refer [next-opcode
+                                 cpu-brk-flag?
+                                 load-program
+                                 max-mem]]
+            [cpu.instructions :refer [lookup-instruction
+                                      instructions]]
+            [cpu.assemble :refer [assemble]]
+            [cpu.parser :refer [parse]]))
 
 (defn step
   ([vm]
@@ -48,11 +53,10 @@
    LDX 12
    INX
    LDY 24
-   BRK"
-  )
+   BRK")
 
 (def program-2
-  "LDX 128      ; 0
+ "LDX 128       ; 0
   LDA 0x77      ; 2
   STAX          ; 4
   INX           ; 5
@@ -219,7 +223,7 @@
   INX
   RTS       ; end 'write who' subroutine")
 
-(def mem (load-program (asm program-1)))
+(def mem (load-program (assemble (parse program-1))))
 
 (def cpu {:pc  0
           :ar  0

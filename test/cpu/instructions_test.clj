@@ -2,14 +2,18 @@
   (:require [clojure.test :refer :all]
             [cpu.helpers :refer :all]
             [cpu.assemble :refer :all]
+            [cpu.parser :refer :all]
             [cpu.debug :refer :all]
             [cpu.core :refer :all]))
+
+;;
+;; Test Helpers
 
 (defn make-memory
   ([program]
    (make-memory program []))
   ([program additional-memory]
-   (vec (into (asm program) (reverse additional-memory)))))
+   (vec (into (assemble (parse program)) (reverse additional-memory)))))
 
 (defn make-cpu
   ([] {:pc 0 :ar 0 :xr 0 :yr 0 :sp 0 :brk false :eq false})
@@ -128,18 +132,51 @@
 
 (deftest rts-tests
   (testing "RTS Return from subroutine"
-    (let [initial-state {:cpu (make-cpu {:sp 15})
-                         :mem (make-memory "NOP    ; 0
-                                            JSR 5  ; 1
-                                            BRK    ; 3
-                                            NOP    ; 4
-                                            RTS    ; 5
-                                            "
-                                           [0 0 0 0 0 0 0 0 0 0 0 0 0 0])}
-          final-state   (-> initial-state
-                            (step)                          ; 0  NOP
-                            (step)                          ; 1  JSR 5
-                            (step)                          ; 3  NOP
-                            (step))]                        ; 4  RTS
-      (is (= 15 (cpu-sp final-state)) "Increments SP")
-      (is (= 3 (cpu-pc final-state)) "Sets the PC to the return address + 1"))))
+    (let [initial-cpu (make-cpu {:sp 15})
+          initial-mem (make-memory "NOP    ; 0
+                                    JSR 5  ; 1
+                                    BRK    ; 3
+                                    NOP    ; 4
+                                    RTS    ; 5
+                                    "
+                                   [0 0  0 0 0 0  0 0 0 0])
+          initial-state {:cpu initial-cpu, :mem initial-mem}
+          initial-mem (get-mem initial-state)]
+      (is (= [234 32 5 0  234 96 0 0  0 0 0 0  0 0 0 0] initial-mem) "Initial memory")
+      (is (= 15 (:sp initial-cpu)) "Initial stack pointer")
+      (is (= 0 (:pc initial-cpu)) "Initial program counter")
+      ;; NOP
+      (let [step-1-vm (step initial-state)
+            step-1-cpu (get-cpu step-1-vm)
+            step-1-mem (get-mem step-1-vm)]
+        (is (= [234 32 5 0  234 96 0 0  0 0 0 0  0 0 0 0] step-1-mem) "Step 1 memory - NOP")
+        (is (= 15 (:sp step-1-cpu)) "Step 1 stack pointer - NOP")
+        (is (= 1 (:pc step-1-cpu)) "Step 1 program counter - NOP")
+        ;; JSR 5
+        (let [step-2-vm (step step-1-vm)
+              step-2-cpu (get-cpu step-2-vm)
+              step-2-mem (get-mem step-2-vm)]
+          (is (= [234 32 5 0  234 96 0 0  0 0 0 0  0 0 0 1] step-2-mem) "Step 2 memory - JSR 5")
+          (is (= 14 (:sp step-2-cpu)) "Step 2 stack pointer - JSR 5")
+          (is (= 4 (:pc step-2-cpu)) "Step 2 program counter - JSR 5")
+          ;; NOP
+          (let [step-3-vm (step step-2-vm)
+                step-3-cpu (get-cpu step-3-vm)
+                step-3-mem (get-mem step-3-vm)]
+            (is (= [234 32 5 0  234 96 0 0  0 0 0 0  0 0 0 1] step-3-mem) "Step 3 memory - NOP")
+            (is (= 14 (:sp step-3-cpu)) "Step 3 stack pointer - NOP")
+            (is (= 5 (:pc step-3-cpu)) "Step 3 program counter - NOP")
+            ;; RTS
+            (let [step-4-vm (step step-3-vm)
+                  step-4-cpu (get-cpu step-4-vm)
+                  step-4-mem (get-mem step-4-vm)]
+              (is (= [234 32 5 0  234 96 0 0  0 0 0 0  0 0 0 1] step-4-mem) "Step 4 memory - RTS")
+              (is (= 15 (:sp step-4-cpu)) "Step 4 stack pointer - RTS")
+              (is (= 3 (:pc step-4-cpu)) "Step 4 program counter - RTS")
+              ;; BRK
+              (let [step-5-vm (step step-4-vm)
+                    step-5-cpu (get-cpu step-5-vm)
+                    step-5-mem (get-mem step-5-vm)]
+                (is (= [234 32 5 0  234 96 0 0  0 0 0 0  0 0 0 1] step-5-mem) "Step 5 memory - BRK")
+                (is (= 15 (:sp step-5-cpu)) "Step 5 stack pointer - BRK")
+                (is (= 4 (:pc step-5-cpu)) "Step 5 program counter - BRK")))))))))
