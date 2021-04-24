@@ -15,7 +15,7 @@ A 6502 CPU emulator created during a Dojo.
    BRK"
   )
 
-(def mem (load-program (asm program)))
+(def mem (load-program (assemble (parse program))))
 
 (def cpu {:pc  0
           :ar  0
