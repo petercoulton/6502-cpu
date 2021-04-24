@@ -161,7 +161,7 @@
             (-> vm
                 (write-mem address value)
                 (dec-sp)
-                (set-pc (dec next-value))))))
+                (set-pc next-value)))))
 
 (defasm :rts
         "Return from subroutine"

@@ -15,7 +15,7 @@
    :brk false
    :eq  false})
 
-(defn create-vm
+(defn- create-vm
   [mem cpu]
   {:cpu cpu :mem mem})
 

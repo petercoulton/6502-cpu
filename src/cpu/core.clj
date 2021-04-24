@@ -32,6 +32,17 @@
        (recur (step vm debug?))
        vm))))
 
+(defn create-vm
+  [program]
+  {:mem (load-program (assemble (parse program)))
+   :cpu {:pc  0
+         :ar  0
+         :xr  0
+         :yr  0
+         :sp  (dec max-mem)
+         :brk false
+         :eq  false}})
+
 ;
 ; Main
 ;
@@ -204,7 +215,7 @@
   STAX
   INX
   LDY 3     ; loop (y = 3)
-  JSR 97    ;   call 'write who' subroutine
+  JSR 96    ;   call 'write who' subroutine
   DEY       ;   y--
   CPY 0     ;   test y==0
   BNE -5    ; while (y != 0)
@@ -223,18 +234,23 @@
   INX
   RTS       ; end 'write who' subroutine")
 
-(def mem (load-program (assemble (parse program-1))))
+(def program-4 "
+  LDX 128
+  LDA 0x77
+  JSR print-char
+  LDA 0x68
+  JSR print-char
+  LDA 0x6F
+  JSR print-char
+  LDA 0x20
+  JSR print-char
+  BRK
+print-char:
+  STAX
+  INX
+  RTS
+")
 
-(def cpu {:pc  0
-          :ar  0
-          :xr  0
-          :yr  0
-          :sp  (dec max-mem)
-          :brk false
-          :eq  false})
-
-(def vm {:cpu cpu :mem mem})
-
-;(dump!! (run vm))
+;(dump!! (run (create-vm program-1)))
 
 
